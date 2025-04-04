@@ -23,7 +23,7 @@ const CompanyCreate = () => {
             setLoading(true);
             const res = await axios.post(`${COMPANY_API_END_POINT}/companies`, {
                 name: companyName
-            }, API_CONFIG);
+            });
 
             if (res.data.success) {
                 toast.success(res.data.message);

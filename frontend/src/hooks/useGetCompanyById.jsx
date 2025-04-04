@@ -1,7 +1,7 @@
 import { setSingleCompany } from '@/redux/companySlice'
 // eslint-disable-next-line no-unused-vars
 import { setAllJobs } from '@/redux/jobSlice'
-import { COMPANY_API_END_POINT, } from '@/utils/constant'
+import { COMPANY_API_END_POINT } from '@/utils/constant'
 import axios from 'axios'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
