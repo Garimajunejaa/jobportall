@@ -6,7 +6,7 @@ import { Button } from '../ui/button'
 import { useSelector } from 'react-redux'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import axios from 'axios'
-import { JOB_API_END_POINT,} from '@/utils/constant'
+import { JOB_API_END_POINT } from '@/utils/constant'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
@@ -71,7 +71,7 @@ const PostJob = () => {
             toast.error('Please fill in all required fields');
             return;
         }
-    
+
         try {
             setLoading(true);
             const formattedInput = {
@@ -81,19 +81,19 @@ const PostJob = () => {
                 position: Number(input.position),
                 experienceLevel: Number(input.experienceLevel)
             };
-    
-            const res = await axios.post(
-                `${JOB_API_END_POINT}/post`,
-                formattedInput,
-                API_CONFIG
-            );
+
+            const res = await axios.post(`${JOB_API_END_POINT}/post`, formattedInput, {
+                headers: { 'Content-Type': 'application/json' },
+                withCredentials: true
+            });
             
             if (res.data.success) {
                 toast.success(res.data.message);
                 navigate("/admin/jobs");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to create job");
+            console.error('Error details:', error);
+            toast.error(error.response?.data?.message || 'Failed to post job');
         } finally {
             setLoading(false);
         }
