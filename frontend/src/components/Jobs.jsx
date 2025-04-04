@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { setFilteredJobs, setSearchFilters } from '@/redux/jobSlice';
+import{ BASE_URL } from '@/utils/constant';
 
 const salaryRanges = [
     { value: '0-30000', label: '$0 - $30,000' },
@@ -148,7 +149,7 @@ const Jobs = () => {
         const fetchJobs = async () => {
             try {
                 setIsLoading(true);
-                const response = await fetch('http://localhost:8000/api/v1/job/filter', {
+                const response = await fetch(`${BASE_URL}/api/v1/job/filter`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

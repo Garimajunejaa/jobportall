@@ -6,7 +6,7 @@ import jobRouter from "./routes/job.route.js";
 const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: 'https://jobportall-1-gylx.onrender.com',
     credentials: true
 }));
 

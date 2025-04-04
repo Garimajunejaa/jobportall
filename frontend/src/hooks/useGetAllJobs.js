@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAllJobs, setLoading, setError } from '@/redux/jobSlice';
+import { JOB_API_END_POINT } from '@/utils/constant';
 
 const useGetAllJobs = () => {
     const dispatch = useDispatch();
@@ -10,7 +11,7 @@ const useGetAllJobs = () => {
         const fetchJobs = async () => {
             dispatch(setLoading(true));
             try {
-                const response = await fetch('http://localhost:8000/api/v1/job/filter', {
+                const response = await fetch(`${JOB_API_END_POINT}/filter`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

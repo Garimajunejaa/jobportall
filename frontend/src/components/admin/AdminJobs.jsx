@@ -1,22 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import Navbar from '../shared/Navbar'
-import { Input } from '../ui/input'
+import AdminNavbar from '../shared/AdminNavbar'
 import { Button } from '../ui/button'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import {  BASE_URL } from '@/utils/constant'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion } from 'framer-motion'
 import { Briefcase, Plus, Search, SlidersHorizontal, MapPin, Building2, Clock, Users, RefreshCw } from 'lucide-react'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import axios from 'axios'
-import { BASE_URL } from '@/utils/constant'
 import { setAllJobs, setAllAdminJobs } from '@/redux/jobSlice'
 import { toast } from 'sonner'
-// Replace Navbar import with AdminNavbar
-import AdminNavbar from '../shared/AdminNavbar'
-import { useNavigate } from 'react-router-dom'  // Add this import at the top
-
-
-import { JOB_API_END_POINT } from '@/utils/constant'
+import { Input } from '../ui/input'
 
 const AdminJobs = () => {
     const navigate = useNavigate();  // Add this hook

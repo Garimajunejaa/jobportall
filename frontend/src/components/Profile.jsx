@@ -22,7 +22,7 @@ const Profile = () => {
     const { user } = useSelector(store => store.auth);
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
-    const [appliedJobs, setAppliedJobs] = useState([]);
+    const [ setAppliedJobs] = useState([]);
 
     // Fetch applied jobs
     useEffect(() => {

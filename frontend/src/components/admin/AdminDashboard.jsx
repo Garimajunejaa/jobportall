@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import AdminNavbar from '../shared/AdminNavbar'
+import { JOB_API_END_POINT,} from '@/utils/constant'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
@@ -148,3 +149,17 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+const fetchDashboardData = async () => {
+    try {
+        const res = await axios.get(`${JOB_API_END_POINT}/dashboard`, API_CONFIG);
+        
+        if (res.data.success) {
+            // Process dashboard data
+            setDashboardData(res.data);
+        }
+    } catch (error) {
+        console.error("Dashboard data fetch error:", error);
+        toast.error(error.response?.data?.message || "Failed to load dashboard data");
+    }
+};

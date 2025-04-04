@@ -5,6 +5,7 @@ import { Avatar, AvatarImage } from './ui/avatar'
 import { Badge } from './ui/badge'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { BASE_URL } from '@/utils/constant'
 
 const Job = ({ job }) => {
     const navigate = useNavigate();

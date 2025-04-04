@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { Filter, Search } from 'lucide-react'
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover'
 import { setAllJobs } from '@/redux/jobSlice';
+import { BASE_URL } from '@/utils/constant';
 
 const LatestJobs = () => {
     const dispatch = useDispatch();
@@ -20,7 +21,7 @@ const LatestJobs = () => {
     useEffect(() => {
         const fetchJobs = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/v1/job/all', {
+                const response = await fetch(`${BASE_URL}/api/v1/job/all`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

@@ -1,13 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import AdminNavbar from '../shared/AdminNavbar';
-import { Button } from '../ui/button';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Mail, Phone, Download, ExternalLink } from 'lucide-react';
-import axios from 'axios';
-import { BASE_URL } from '@/utils/constant';
-import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import axios from 'axios'
+import { APPLICATION_API_END_POINT,} from '@/utils/constant'
+import { toast } from 'sonner'
+import { useNavigate } from 'react-router-dom'
 
 const JobApplicants = () => {
     const { jobId } = useParams();
@@ -19,19 +15,18 @@ const JobApplicants = () => {
     useEffect(() => {
         const fetchApplicants = async () => {
             try {
-                const response = await axios.get(`${BASE_URL}/api/v1/job/${jobId}/applicants`, {
-                    withCredentials: true
-                });
-                
-                if (response.data.success) {
-                    setApplicants(response.data.applicants);
-                    setJobDetails(response.data.job);
+                const res = await axios.get(
+                    `${APPLICATION_API_END_POINT}/applications/job/${jobId}`,
+                    API_CONFIG
+                );
+                if (res.data.success) {
+                    setApplicants(res.data.applications);
                 }
             } catch (error) {
-                toast.error("Failed to fetch applicants");
-                console.error(error);
+                console.error("Error fetching applicants:", error);
+                toast.error(error.response?.data?.message || "Failed to fetch applicants");
             } finally {
-                setIsLoading(false);
+                setLoading(false);
             }
         };
 

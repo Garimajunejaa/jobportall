@@ -3,7 +3,7 @@ import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { APPLICATION_API_END_POINT, JOB_API_END_POINT } from '@/utils/constant';
+import { JOB_API_END_POINT, APPLICATION_API_END_POINT,} from '@/utils/constant';
 import { setSingleJob } from '@/redux/jobSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
@@ -31,16 +31,13 @@ const JobDescription = () => {
             setIsApplying(true);
             const response = await axios.get(
                 `${APPLICATION_API_END_POINT}/apply/${jobId}`,
-                { withCredentials: true }
+                API_CONFIG
             );
 
             if (response.data.success) {
                 toast.success("Successfully applied for the job!");
-            } else {
-                toast.error(response.data.message || "Failed to apply");
             }
         } catch (error) {
-            console.error("Application error:", error);
             toast.error(error.response?.data?.message || "Error applying for job");
         } finally {
             setIsApplying(false);
@@ -57,10 +54,7 @@ const JobDescription = () => {
     useEffect(() => {
         const fetchSingleJob = async () => {
             try {
-                setIsLoading(true);  // Set loading true before fetch
-                const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, {
-                    withCredentials: true
-                });
+                const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, API_CONFIG);
                 if (res.data.success) {
                     dispatch(setSingleJob(res.data.job));
                 } else {

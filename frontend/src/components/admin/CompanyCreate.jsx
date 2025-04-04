@@ -1,50 +1,41 @@
 import React, { useState } from 'react'
-import Navbar from '../shared/Navbar'
-import { Label } from '../ui/label'
-import { Input } from '../ui/input'
-import { Button } from '../ui/button'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { COMPANY_API_END_POINT } from '@/utils/constant'
+import { COMPANY_API_END_POINT,} from '@/utils/constant'
 import { toast } from 'sonner'
-import { useDispatch } from 'react-redux'
-import { setSingleCompany } from '@/redux/companySlice'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { Label } from '../ui/label'
 import { Loader2 } from 'lucide-react'
 
 const CompanyCreate = () => {
-    const navigate = useNavigate();
     const [companyName, setCompanyName] = useState('');
     const [loading, setLoading] = useState(false);
-    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const registerNewCompany = async () => {
         if (!companyName.trim()) {
-            toast.error('Please enter a company name');
+            toast.error("Company name is required");
             return;
         }
 
         try {
             setLoading(true);
-            const res = await axios.post(`${COMPANY_API_END_POINT}/register`, 
-                { companyName }, 
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true
-                }
-            );
-            
-            if (res?.data?.success) {
-                dispatch(setSingleCompany(res.data.company));
+            const res = await axios.post(`${COMPANY_API_END_POINT}/companies`, {
+                name: companyName
+            }, API_CONFIG);
+
+            if (res.data.success) {
                 toast.success(res.data.message);
-                const companyId = res?.data?.company?._id;
-                navigate(`/admin/companies/${companyId}`);
+                navigate('/admin/companies');
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Something went wrong');
+            console.error("Company creation error:", error);
+            toast.error(error.response?.data?.message || "Failed to create company");
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     return (
         <div className='min-h-screen bg-gradient-to-r from-violet-50 via-teal-50 to-cyan-50'>

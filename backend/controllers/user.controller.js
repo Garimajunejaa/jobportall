@@ -50,65 +50,66 @@ export const register = async (req, res) => {
         });
     }
 }
-export const login = async (req, res) => {
+export const loginUser = async (req, res) => {
     try {
         const { email, password, role } = req.body;
-        
+
+        // Validate input
         if (!email || !password || !role) {
             return res.status(400).json({
-                message: "Please fill all the fields",
-                success: false
+                success: false,
+                message: "Please provide email, password and role"
             });
-        };
-        let user = await User.findOne({ email });
+        }
+
+        // Find user and include password field
+        const user = await User.findOne({ email }).select('+password');
+        
         if (!user) {
-            return res.status(400).json({
-                message: "Incorrect email or password.",
+            return res.status(401).json({
                 success: false,
-            })
+                message: "Invalid credentials"
+            });
         }
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
-        if (!isPasswordMatch) {
-            return res.status(400).json({
-                message: "Incorrect email or password.",
+
+        // Check password
+        const isPasswordValid = await user.comparePassword(password);
+        if (!isPasswordValid) {
+            return res.status(401).json({
                 success: false,
-            })
-        };
-        // check role is correct or not
-        if (role !== user.role) {
-            return res.status(400).json({
-                message: "Account doesn't exist with current role.",
-                success: false
-            })
-        };
-
-        const tokenData = {
-            userId: user._id
-        }
-        const token = await jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: '1d' });
-
-        user = {
-            _id: user._id,
-            fullname: user.fullname,
-            email: user.email,
-            phoneNumber: user.phoneNumber,
-            role: user.role,
-            profile: user.profile
+                message: "Invalid credentials"
+            });
         }
 
-        return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpsOnly: true, sameSite: 'strict' }).json({
-            message: `Welcome back ${user.fullname}`,
-            user,
-            success: true
-        })
+        // Verify role
+        if (user.role !== role) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized role"
+            });
+        }
+
+        // Generate token
+        const token = user.getJWTToken();
+
+        // Remove password from response
+        user.password = undefined;
+
+        res.status(200).json({
+            success: true,
+            token,
+            user
+        });
+
     } catch (error) {
-        console.error("Login error:", error);
-        return res.status(500).json({
-            message: error.message || "Login failed. Please try again.",
-            success: false
+        console.error('Login error:', error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message
         });
     }
-}
+};
 export const logout = async (req, res) => {
     try {
         return res.status(200).cookie("token", "", { maxAge: 0 }).json({

@@ -1,5 +1,5 @@
 // ... imports remain the same ...
-
+import { BASE_URL } from "@/utils/constant";
 const Jobs = () => {
     const dispatch = useDispatch();
     const { allJobs } = useSelector(store => store.job);
