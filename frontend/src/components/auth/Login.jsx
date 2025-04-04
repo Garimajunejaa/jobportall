@@ -19,12 +19,11 @@ const Login = () => {
         password: "",
         role: "",
     });
-    const { loading, user } = useSelector(store => store.auth);
+    const { loading,user } = useSelector(store => store.auth);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);  // Add local loading state
 
     const changeEventHandler = (e) => {
         setInput({ ...input, [e.target.name]: e.target.value });
@@ -32,12 +31,8 @@ const Login = () => {
 
     const submitHandler = async (e) => {
         e.preventDefault();
-        if (!input.email || !input.password || !input.role) {
-            toast.error("Please fill all the fields");
-            return;
-        }
-        setIsSubmitting(true);  // Use local loading state
         try {
+            dispatch(setLoading(true));
             const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
                 headers: {
                     "Content-Type": "application/json"
@@ -50,17 +45,17 @@ const Login = () => {
                 toast.success(res.data.message);
             }
         } catch (error) {
-            console.error("Login error:", error);
-            toast.error(error.response?.data?.message || "Login failed. Please try again.");
+            console.log(error);
+            toast.error(error.response.data.message);
         } finally {
-            setIsSubmitting(false);  // Reset local loading state
+            dispatch(setLoading(false));
         }
     }
     useEffect(()=>{
         if(user){
             navigate("/");
         }
-    },[user, navigate]); // Add proper dependencies
+    },[])
     return (
         <div className="min-h-screen bg-gradient-to-r from-blue-50 to-indigo-50">
             <Navbar />
@@ -145,13 +140,12 @@ const Login = () => {
                         </RadioGroup>
                     </div>
 
-                    
                     <Button 
-                        disabled={isSubmitting}  // Use local loading state
+                        disabled={loading}
                         type="submit" 
                         className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 rounded-lg transition-all duration-200 my-4"
                     >
-                        {isSubmitting ? (
+                        {loading ? (
                             <><Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait</>
                         ) : (
                             'Login'
