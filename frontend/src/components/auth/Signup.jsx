@@ -48,11 +48,47 @@ const Signup = () => {
     }
     const submitHandler = async (e) => {
         e.preventDefault();
-        if (!input.fullname || !input.email || !input.password || !input.role || !input.phoneNumber) {
-            toast.error("Please fill all the required fields");
+        if (!input.email || !input.password || !input.role || !input.name) {
+            toast.error("Please fill all the fields");
             return;
         }
-        const formData = new FormData();
+        try {
+            dispatch(setLoading(true));
+            const formData = new FormData();
+            formData.append('name', input.name.trim());
+            formData.append('email', input.email.trim().toLowerCase());
+            formData.append('password', input.password);
+            formData.append('role', input.role);
+            if (avatar) {
+                formData.append('avatar', avatar);
+            }
+
+            const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                withCredentials: true,
+            });
+
+            if (res.data.success) {
+                setInput({
+                    name: "",
+                    email: "",
+                    password: "",
+                    role: ""
+                });
+                setAvatar(null);
+                toast.success("Registration successful! Please login.");
+                navigate("/login");
+            }
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || "Registration failed";
+            toast.error(errorMessage);
+        } finally {
+            dispatch(setLoading(false));
+        }
+    }
+        const formData = new FormData();    //formdata object
         formData.append("fullname", input.fullname);
         formData.append("email", input.email);
         formData.append("phoneNumber", input.phoneNumber);
@@ -74,8 +110,8 @@ const Signup = () => {
             }
         } catch (error) {
             console.log(error);
-            toast.error(error.response?.data?.message || "Something went wrong");
-        } finally {
+            toast.error(error.response.data.message);
+        } finally{
             dispatch(setLoading(false));
         }
     }
@@ -84,7 +120,7 @@ const Signup = () => {
         if(user){
             navigate("/");
         }
-    },[user, navigate]); // Add proper dependencies
+    },[])
     return (
         <div className="min-h-screen bg-gradient-to-r from-blue-50 to-indigo-50">
             <Navbar />

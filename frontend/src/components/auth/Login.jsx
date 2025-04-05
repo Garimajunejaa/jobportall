@@ -31,22 +31,39 @@ const Login = () => {
 
     const submitHandler = async (e) => {
         e.preventDefault();
+        if (!input.email || !input.password || !input.role) {
+            toast.error("Please fill all the fields");
+            return;
+        }
         try {
             dispatch(setLoading(true));
-            const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
+            const res = await axios.post(`${USER_API_END_POINT}/login`, {
+                email: input.email.trim().toLowerCase(),
+                password: input.password,
+                role: input.role
+            }, {
                 headers: {
                     "Content-Type": "application/json"
                 },
                 withCredentials: true,
             });
+            
             if (res.data.success) {
+                localStorage.setItem('token', res.data.token);
+                localStorage.setItem('role', input.role);
                 dispatch(setUser(res.data.user));
-                navigate("/");
-                toast.success(res.data.message);
+                
+                if (input.role === 'recruiter') {
+                    navigate("/admin/dashboard");
+                } else {
+                    navigate("/");
+                }
+                toast.success("Login successful!");
             }
         } catch (error) {
-            console.log(error);
-            toast.error(error.response.data.message);
+            const errorMessage = error.response?.data?.message || "Login failed";
+            toast.error(errorMessage);
+            setInput(prev => ({ ...prev, password: '' }));
         } finally {
             dispatch(setLoading(false));
         }
