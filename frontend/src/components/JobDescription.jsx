@@ -3,7 +3,7 @@ import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { JOB_API_END_POINT, APPLICATION_API_END_POINT,} from '@/utils/constant';
+import { APPLICATION_API_END_POINT, JOB_API_END_POINT } from '@/utils/constant';
 import { setSingleJob } from '@/redux/jobSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
@@ -31,13 +31,16 @@ const JobDescription = () => {
             setIsApplying(true);
             const response = await axios.get(
                 `${APPLICATION_API_END_POINT}/apply/${jobId}`,
-                API_CONFIG
+                { withCredentials: true }
             );
 
             if (response.data.success) {
                 toast.success("Successfully applied for the job!");
+            } else {
+                toast.error(response.data.message || "Failed to apply");
             }
         } catch (error) {
+            console.error("Application error:", error);
             toast.error(error.response?.data?.message || "Error applying for job");
         } finally {
             setIsApplying(false);
@@ -49,41 +52,22 @@ const JobDescription = () => {
         app.applicant === user?._id
     );
 
-    const [isLoading, setIsLoading] = useState(true);  // Add loading state
-
-    useEffect(() => {
+    useEffect(()=>{
         const fetchSingleJob = async () => {
             try {
-                const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, API_CONFIG);
-                if (res.data.success) {
+                const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`,{withCredentials:true});
+                if(res.data.success){
                     dispatch(setSingleJob(res.data.job));
-                } else {
-                    toast.error("Failed to fetch job details");
                 }
             } catch (error) {
-                console.error("Error fetching job:", error);
-                toast.error(error.response?.data?.message || "Error fetching job details");
-            } finally {
-                setIsLoading(false);  // Set loading false after fetch
+                console.log(error);
             }
         }
-        fetchSingleJob();
-    }, [jobId, dispatch]);
-
-    if (isLoading) {
-        return (
-            <div className="flex justify-center items-center min-h-[60vh]">
-                <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
-            </div>
-        );
-    }
+        fetchSingleJob(); 
+    },[jobId,dispatch, user?._id]);
 
     if (!singleJob) {
-        return (
-            <div className="flex justify-center items-center min-h-[60vh]">
-                <p className="text-gray-500">Job not found</p>
-            </div>
-        );
+        return <div>Loading...</div>;
     }
 
     return (

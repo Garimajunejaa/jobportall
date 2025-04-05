@@ -31,10 +31,6 @@ const Login = () => {
 
     const submitHandler = async (e) => {
         e.preventDefault();
-        if (!input.email || !input.password || !input.role) {
-            toast.error("Please fill all the fields");
-            return;
-        }
         try {
             dispatch(setLoading(true));
             const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
@@ -43,20 +39,14 @@ const Login = () => {
                 },
                 withCredentials: true,
             });
-            
             if (res.data.success) {
-                localStorage.setItem('token', res.data.token); // Store token
                 dispatch(setUser(res.data.user));
-                if (input.role === 'recruiter') {
-                    navigate("/admin/dashboard");
-                } else {
-                    navigate("/");
-                }
-                toast.success("Login successful!");
+                navigate("/");
+                toast.success(res.data.message);
             }
         } catch (error) {
-            console.error("Login error:", error);
-            toast.error(error.response?.data?.message || "Invalid email or password");
+            console.log(error);
+            toast.error(error.response.data.message);
         } finally {
             dispatch(setLoading(false));
         }
