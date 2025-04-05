@@ -48,49 +48,14 @@ const Signup = () => {
     }
     const submitHandler = async (e) => {
         e.preventDefault();
-        if (!input.email || !input.password || !input.role || !input.name) {
-            toast.error("Please fill all the fields");
+        if (!input.fullname || !input.email || !input.password || !input.role) {
+            toast.error("Please fill all required fields");
             return;
         }
-        try {
-            dispatch(setLoading(true));
-            const formData = new FormData();
-            formData.append('name', input.name.trim());
-            formData.append('email', input.email.trim().toLowerCase());
-            formData.append('password', input.password);
-            formData.append('role', input.role);
-            if (avatar) {
-                formData.append('avatar', avatar);
-            }
 
-            const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                withCredentials: true,
-            });
-
-            if (res.data.success) {
-                setInput({
-                    name: "",
-                    email: "",
-                    password: "",
-                    role: ""
-                });
-                setAvatar(null);
-                toast.success("Registration successful! Please login.");
-                navigate("/login");
-            }
-        } catch (error) {
-            const errorMessage = error.response?.data?.message || "Registration failed";
-            toast.error(errorMessage);
-        } finally {
-            dispatch(setLoading(false));
-        }
-    }
-        const formData = new FormData();    //formdata object
-        formData.append("fullname", input.fullname);
-        formData.append("email", input.email);
+        const formData = new FormData();
+        formData.append("fullname", input.fullname.trim());
+        formData.append("email", input.email.trim().toLowerCase());
         formData.append("phoneNumber", input.phoneNumber);
         formData.append("password", input.password);
         formData.append("role", input.role);
@@ -104,14 +69,23 @@ const Signup = () => {
                 headers: { 'Content-Type': "multipart/form-data" },
                 withCredentials: true,
             });
+            
             if (res.data.success) {
+                setInput({
+                    fullname: "",
+                    email: "",
+                    phoneNumber: "",
+                    password: "",
+                    role: "",
+                    file: ""
+                });
+                toast.success("Registration successful! Please login.");
                 navigate("/login");
-                toast.success(res.data.message);
             }
         } catch (error) {
-            console.log(error);
-            toast.error(error.response.data.message);
-        } finally{
+            const errorMessage = error.response?.data?.message || "Registration failed";
+            toast.error(errorMessage);
+        } finally {
             dispatch(setLoading(false));
         }
     }
