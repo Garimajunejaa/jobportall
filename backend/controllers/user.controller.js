@@ -8,33 +8,41 @@ export const register = async (req, res) => {
     try {
         const { fullname, email, phoneNumber, password, role } = req.body;
          
-        if (!fullname || !email || !phoneNumber || !password || !role) {
+        // Check only required fields
+        if (!fullname || !email || !password || !role) {
             return res.status(400).json({
-                message: "Something is missing",
+                message: "Please fill all required fields (name, email, password, role)",
                 success: false
             });
-        };
-        const file = req.file;
-        const fileUri = getDataUri(file);
-        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+        }
 
-        const user = await User.findOne({ email });
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                message: "Please enter a valid email address",
+                success: false
+            });
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase() });
         if (user) {
             return res.status(400).json({
-                message: 'User already exist with this email.',
+                message: 'User already exists with this email.',
                 success: false,
-            })
+            });
         }
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await User.create({
-            fullname,
-            email,
-            phoneNumber,
+        const newUser = await User.create({
+            fullname: fullname.trim(),
+            email: email.toLowerCase().trim(),
             password: hashedPassword,
             role,
-            profile:{
-                profilePhoto:cloudResponse.secure_url,
+            phoneNumber: phoneNumber?.trim() || "",
+            profile: {
+                profilePhoto: ""
             }
         });
 
@@ -43,7 +51,11 @@ export const register = async (req, res) => {
             success: true
         });
     } catch (error) {
-        console.log(error);
+        console.error("Registration error:", error);
+        return res.status(500).json({
+            message: "Registration failed. Please try again later.",
+            success: false
+        });
     }
 }
 export const login = async (req, res) => {

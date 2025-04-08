@@ -49,62 +49,49 @@ const Signup = () => {
     const submitHandler = async (e) => {
         e.preventDefault();
         
-        // Basic validation for required fields
-        if (!input.fullname || !input.email || !input.password || !input.role) {
-            toast.error("Please fill all required fields");
-            return;
-        }
-
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(input.email.trim())) {
-            toast.error("Please enter a valid email address");
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append("fullname", input.fullname.trim());
-        formData.append("email", input.email.trim().toLowerCase());
-        formData.append("password", input.password);
-        formData.append("role", input.role);
-        
-        if (input.phoneNumber?.trim()) {
-            formData.append("phoneNumber", input.phoneNumber.trim());
-        }
-        if (input.file) {
-            formData.append("file", input.file);
-        }
-
         try {
             dispatch(setLoading(true));
-            const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
-                headers: { 'Content-Type': "multipart/form-data" },
-                withCredentials: true,
-            });
             
-            if (res.data.success) {
-                toast.success("Registration successful! Please login.");
+            // Only validate required fields: fullname, email, and role
+            if (!input.fullname || !input.email || !input.role) {
+                toast.error("Please fill required fields: Name, Email, and Role");
+                return;
+            }
+
+            // Create request data with required fields
+            const userData = {
+                fullname: input.fullname.trim(),
+                email: input.email.trim().toLowerCase(),
+                role: input.role,
+                // Add optional fields only if they exist
+                ...(input.password && { password: input.password }),
+                ...(input.phoneNumber?.trim() && { phoneNumber: input.phoneNumber.trim() })
+            };
+
+            const response = await axios.post(`${USER_API_END_POINT}/register`, userData, {
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
+                withCredentials: true
+            });
+
+            if (response?.data?.success) {
+                toast.success(response.data.message || "Registration successful!");
                 navigate("/login");
             }
         } catch (error) {
-            dispatch(setLoading(false)); // Reset loading state on error
-            const errorMessage = error.response?.data?.message || "Registration failed";
-            toast.error(errorMessage);
-            return; // Exit early on error
+            console.error("Registration error:", error);
+            if (error.response?.data?.message) {
+                toast.error(error.response.data.message);
+            } else if (error.code === 'ERR_NETWORK') {
+                toast.error("Network error. Please check your connection.");
+            } else {
+                toast.error("Registration failed. Please try again.");
+            }
+        } finally {
+            dispatch(setLoading(false));
         }
-        dispatch(setLoading(false)); // Ensure loading state is reset
     }
-
-    // Update the file input to be optional
-    <div className='flex items-center gap-2'>
-        <Label>Profile (Optional)</Label>
-        <Input
-            accept="image/*"
-            type="file"
-            onChange={changeFileHandler}
-            className="cursor-pointer"
-        />
-    </div>
 
     useEffect(()=>{
         if(user){
@@ -224,19 +211,15 @@ const Signup = () => {
                             />
                         </div>
                     </div>
-                    // Update the submit button
                     <Button 
                         disabled={loading}
                         type="submit" 
                         className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 rounded-lg transition-all duration-200 my-4"
                     >
                         {loading ? (
-                            <div className="flex items-center justify-center gap-2">
-                                <Loader2 className='animate-spin' />
-                                <span>Creating Account...</span>
-                            </div>
+                            <><Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait</>
                         ) : (
-                            'Create Account'
+                            'Sign Up'
                         )}
                     </Button>
                     <p className="text-center text-sm text-gray-600">

@@ -12,11 +12,11 @@ const userSchema = new mongoose.Schema({
     },
     phoneNumber: {
         type: Number,
-        required: true
+        required: false  // Changed from true to false
     },
-    password:{
-        type:String,
-        required:true,
+    password: {
+        type: String,
+        required: false  // Changed from true to false since we have default password
     },
     role:{
         type:String,
