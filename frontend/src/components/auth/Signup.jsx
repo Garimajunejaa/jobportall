@@ -48,17 +48,29 @@ const Signup = () => {
     }
     const submitHandler = async (e) => {
         e.preventDefault();
+        
+        // Basic validation for required fields
         if (!input.fullname || !input.email || !input.password || !input.role) {
             toast.error("Please fill all required fields");
+            return;
+        }
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(input.email.trim())) {
+            toast.error("Please enter a valid email address");
             return;
         }
 
         const formData = new FormData();
         formData.append("fullname", input.fullname.trim());
         formData.append("email", input.email.trim().toLowerCase());
-        formData.append("phoneNumber", input.phoneNumber);
         formData.append("password", input.password);
         formData.append("role", input.role);
+        
+        if (input.phoneNumber?.trim()) {
+            formData.append("phoneNumber", input.phoneNumber.trim());
+        }
         if (input.file) {
             formData.append("file", input.file);
         }
@@ -71,24 +83,28 @@ const Signup = () => {
             });
             
             if (res.data.success) {
-                setInput({
-                    fullname: "",
-                    email: "",
-                    phoneNumber: "",
-                    password: "",
-                    role: "",
-                    file: ""
-                });
                 toast.success("Registration successful! Please login.");
                 navigate("/login");
             }
         } catch (error) {
+            dispatch(setLoading(false)); // Reset loading state on error
             const errorMessage = error.response?.data?.message || "Registration failed";
             toast.error(errorMessage);
-        } finally {
-            dispatch(setLoading(false));
+            return; // Exit early on error
         }
+        dispatch(setLoading(false)); // Ensure loading state is reset
     }
+
+    // Update the file input to be optional
+    <div className='flex items-center gap-2'>
+        <Label>Profile (Optional)</Label>
+        <Input
+            accept="image/*"
+            type="file"
+            onChange={changeFileHandler}
+            className="cursor-pointer"
+        />
+    </div>
 
     useEffect(()=>{
         if(user){
@@ -208,15 +224,19 @@ const Signup = () => {
                             />
                         </div>
                     </div>
+                    // Update the submit button
                     <Button 
                         disabled={loading}
                         type="submit" 
                         className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 rounded-lg transition-all duration-200 my-4"
                     >
                         {loading ? (
-                            <><Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait</>
+                            <div className="flex items-center justify-center gap-2">
+                                <Loader2 className='animate-spin' />
+                                <span>Creating Account...</span>
+                            </div>
                         ) : (
-                            'Sign Up'
+                            'Create Account'
                         )}
                     </Button>
                     <p className="text-center text-sm text-gray-600">
