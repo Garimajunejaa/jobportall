@@ -1,5 +1,5 @@
 // Change this from an array to a single string
-export const BASE_URL = "https://your-backend.onrender.com";
+export const BASE_URL = "https://jobportall-ex99.onrender.com";
 
 
 // Keep these unchanged
