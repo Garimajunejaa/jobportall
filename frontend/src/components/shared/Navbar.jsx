@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { LogOut, Menu, User2, X } from 'lucide-react'
+import { LogOut, Menu, User2, X, Star } from 'lucide-react'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -36,11 +36,7 @@ const Navbar = () => {
         }
     }
 
-    const navLinks = [
-        { name: 'Home', path: '/' },
-        { name: 'Jobs', path: '/jobs' },
-        { name: 'Browse', path: '/browse' }  // Updated path for Browse
-    ];
+    // Removed unused navLinks array to fix lint error
 
     return (
         <div className='bg-gradient-to-r from-violet-50/90 via-teal-50/90 to-cyan-50/90 backdrop-blur-xl border-b border-violet-100/50 sticky top-0 z-50 shadow-sm'>
@@ -81,7 +77,7 @@ const Navbar = () => {
                         initial="hidden"
                         animate="show"
                     >
-                        {['Home', 'Jobs', 'Browse'].map((item, index) => (
+                        {['Home', 'Jobs', 'Browse'].map((item) => (
                             <motion.li
                                 key={item}
                                 variants={{
@@ -92,7 +88,7 @@ const Navbar = () => {
                                 <Link 
                                     to={item === 'Home' ? '/' : 
                                         item === 'Jobs' ? '/jobs' : 
-                                        item === 'Browse' ? '/jobs' : '/'}
+                                        item === 'Browse' ? '/browse' : '/'}
                                     className="relative text-gray-700 hover:text-sky-600 transition-colors duration-300 group"
                                 >
                                     {item}
@@ -124,6 +120,14 @@ const Navbar = () => {
                                     >
                                         <User2 className='w-4 h-4' />
                                         Profile
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        className='w-full justify-start gap-3 text-[15px] font-medium hover:bg-green-50 hover:text-green-600 text-gray-700 rounded-xl transition-all duration-300'
+                                        onClick={() => navigate('/recommended-jobs')}
+                                    >
+                                        <Star className='w-4 h-4' />
+                                        Recommended Jobs
                                     </Button>
                                     <Button
                                         variant="ghost"

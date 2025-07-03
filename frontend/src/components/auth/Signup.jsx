@@ -52,41 +52,34 @@ const Signup = () => {
         try {
             dispatch(setLoading(true));
             
-            // Only validate required fields: fullname, email, and role
-            if (!input.fullname || !input.email || !input.role) {
-                toast.error("Please fill required fields: Name, Email, and Role");
-                return;
-            }
-
-            // Create request data with required fields
+            // Create the request body
             const userData = {
                 fullname: input.fullname.trim(),
                 email: input.email.trim().toLowerCase(),
+                password: input.password,
                 role: input.role,
-                // Add optional fields only if they exist
-                ...(input.password && { password: input.password }),
-                ...(input.phoneNumber?.trim() && { phoneNumber: input.phoneNumber.trim() })
+                phoneNumber: input.phoneNumber?.trim() || ""
             };
-
+            
+            // Make the API call
             const response = await axios.post(`${USER_API_END_POINT}/register`, userData, {
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json'
                 },
-                withCredentials: true
+                withCredentials: false // Change this to false for now
             });
-
-            if (response?.data?.success) {
-                toast.success(response.data.message || "Registration successful!");
+            
+            if (response.data.success) {
+                toast.success("Registration successful!");
                 navigate("/login");
             }
         } catch (error) {
             console.error("Registration error:", error);
-            if (error.response?.data?.message) {
-                toast.error(error.response.data.message);
-            } else if (error.code === 'ERR_NETWORK') {
-                toast.error("Network error. Please check your connection.");
+            if (error.code === 'ERR_NETWORK') {
+                toast.error("Network error. Please check your internet connection.");
             } else {
-                toast.error("Registration failed. Please try again.");
+                const message = error.response?.data?.message || "Registration failed. Please try again.";
+                toast.error(message);
             }
         } finally {
             dispatch(setLoading(false));

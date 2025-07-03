@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
     allJobs: [],
     filteredJobs: [],
+    allAppliedJobs: [],
     singleJob: null,  // Add this
     searchedQuery: '',
     searchFilters: {

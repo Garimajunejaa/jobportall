@@ -5,12 +5,16 @@ import { JOB_API_END_POINT } from '@/utils/constant';
 
 const useGetAllJobs = () => {
     const dispatch = useDispatch();
-    const { filters, searchedQuery } = useSelector(state => state.job);
+    const { searchFilters, searchedQuery } = useSelector(state => state.job);
 
     useEffect(() => {
+        console.log('Current filters:', searchFilters);
+        console.log('Current searchedQuery:', searchedQuery);
+
         const fetchJobs = async () => {
             dispatch(setLoading(true));
             try {
+                console.log('Fetching jobs with filters:', searchFilters, 'and query:', searchedQuery);
                 const response = await fetch(`${JOB_API_END_POINT}/filter`, {
                     method: 'POST',
                     headers: {
@@ -19,7 +23,7 @@ const useGetAllJobs = () => {
                     credentials: 'include',
                     body: JSON.stringify({
                         query: searchedQuery,
-                        ...filters
+                        ...searchFilters
                     })
                 });
 
@@ -29,6 +33,7 @@ const useGetAllJobs = () => {
 
                 const data = await response.json();
                 if (data.success) {
+                    console.log('Jobs fetched:', data.jobs.length);
                     dispatch(setAllJobs(data.jobs));
                 }
             } catch (error) {
@@ -40,7 +45,7 @@ const useGetAllJobs = () => {
         };
 
         fetchJobs();
-    }, [dispatch, filters, searchedQuery]);
+    }, [dispatch, searchFilters, searchedQuery]);
 };
 
 export default useGetAllJobs;

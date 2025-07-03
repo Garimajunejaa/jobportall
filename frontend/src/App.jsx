@@ -20,7 +20,8 @@ import Applicants from './components/admin/Applicants'
 import ProtectedRoute from './components/admin/ProtectedRoute'
 import AdminDashboard from './components/admin/AdminDashboard'
 import RecruiterProfile from './components/admin/RecruiterProfile'
-import HeroSection from './components/HeroSection';
+import HeroSection from './components/HeroSection'
+import RecommendedJobsPage from './pages/RecommendedJobsPage';
 
 function ErrorBoundary() {
   return (
@@ -71,6 +72,11 @@ const appRouter = createBrowserRouter([
   {
     path: "/profile",
     element: <Profile />,
+    errorElement: <ErrorBoundary />
+  },
+  {
+    path: "/recommended-jobs",
+    element: <RecommendedJobsPage />,
     errorElement: <ErrorBoundary />
   },
   {

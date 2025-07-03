@@ -16,10 +16,10 @@ const salaryRanges = [
 ];
 
 const experienceLevels = [
-    { value: 'entry', label: 'Entry Level' },
-    { value: 'intermediate', label: 'Intermediate' },
-    { value: 'senior', label: 'Senior' },
-    { value: 'expert', label: 'Expert' }
+    { value: '1', label: 'Entry Level' },
+    { value: '2', label: 'Intermediate' },
+    { value: '3', label: 'Senior' },
+    { value: '4', label: 'Expert' }
 ];
 
 const jobTypes = [
@@ -50,7 +50,30 @@ const Jobs = () => {
         industry: '',
         postedWithin: ''
     });
-    
+
+    const handleFilterChange = (filterName, value) => {
+        setFilters(prevFilters => ({
+            ...prevFilters,
+            [filterName]: value
+        }));
+    };
+
+    // Initialize filters and searchText from navigation state on mount
+    useEffect(() => {
+        if (location.state && location.state.searchFilters) {
+            const sf = location.state.searchFilters;
+            setFilters({
+                location: sf.location || '',
+                jobType: sf.jobType || '',
+                experienceLevel: sf.experienceLevel || '',
+                salaryRange: sf.salaryRange || '',
+                industry: sf.industry || '',
+                postedWithin: sf.postedWithin || ''
+            });
+            setSearchText(sf.query || '');
+        }
+    }, [location.state]);
+
     useEffect(() => {
         const applyFilters = () => {
             let filteredResults= [...filteredJobs];
@@ -62,20 +85,20 @@ const Jobs = () => {
                     job.location?.toLowerCase().includes(searchText.toLowerCase())
                 );
             }
-    
+
             // Apply filters
             if (filters.jobType) {
                 filteredResults = filteredResults.filter(job => 
                     job.jobType?.toLowerCase() === filters.jobType.toLowerCase()
                 );
             }
-    
+
             if (filters.experienceLevel) {
-                filteredResults = filteredResults.filter(job => 
+                filteredResults = filteredResults.filter(job =>
                     job.experienceLevel?.toString() === filters.experienceLevel
                 );
             }
-    
+
             if (filters.salaryRange) {
                 const [min, max] = filters.salaryRange.split('-').map(Number);
                 filteredResults = filteredResults.filter(job => {
@@ -86,7 +109,7 @@ const Jobs = () => {
                     return salary >= min;
                 });
             }
-    
+
             // Apply sorting
             filteredResults.sort((a, b) => {
                 switch (sortBy) {
@@ -102,13 +125,13 @@ const Jobs = () => {
                         return 0;
                 }
             });
-    
+
             setFilterJobs(filteredResults);
         };
-    
+
         applyFilters();
     }, [filteredJobs, searchText, filters, sortBy]);
-    
+
     // Update the handleSearch function
     const handleSearch = () => {
         setIsLoading(true);
@@ -120,7 +143,7 @@ const Jobs = () => {
             setIsLoading(false);
         }
     };
-    
+
     // Update the quickFilter function
     const quickFilter = (tag) => {
         const tagLower = tag.toLowerCase();
@@ -135,7 +158,7 @@ const Jobs = () => {
                 setFilters(prev => ({ ...prev, industry: 'technology' }));
                 break;
             case 'entry level':
-                setFilters(prev => ({ ...prev, experienceLevel: 'entry' }));
+                setFilters(prev => ({ ...prev, experienceLevel: '1' }));
                 break;
             case 'urgent hiring':
                 setSortBy('latest');
@@ -144,6 +167,7 @@ const Jobs = () => {
                 break;
         }
     };
+
     // Single useEffect for fetching jobs
     useEffect(() => {
         const fetchJobs = async () => {
@@ -160,11 +184,11 @@ const Jobs = () => {
                         ...filters
                     })
                 });
-    
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-    
+
                 const data = await response.json();
                 if (data.success) {
                     setFilterJobs(data.jobs);
@@ -180,13 +204,14 @@ const Jobs = () => {
         };
         fetchJobs();
     }, [dispatch, searchText, filters]);
+
     // Add search state
-    
+
     const fetchJobs = async () => {
         try {
             const response = await fetch('/api/v1/job/jobs');
             const data = await response.json();
-            
+
             if (data.success) {
                 setFilterJobs(data.jobs);
                 dispatch(setFilteredJobs(data.jobs));
@@ -200,6 +225,7 @@ const Jobs = () => {
             setIsLoading(false);
         }
     };
+
     // Add search input in the return JSX
     return (
         <div className='min-h-screen bg-gradient-to-r from-violet-50 via-teal-50 to-cyan-50'>
@@ -223,7 +249,7 @@ const Jobs = () => {
                                 🔍
                             </span>
                         </div>
-                        <button 
+                        <button
                             onClick={handleSearch}
                             disabled={isLoading}
                             className='px-6 py-4 bg-gradient-to-r from-violet-600 to-cyan-600 text-white rounded-xl hover:opacity-90 transition-all duration-300 font-semibold disabled:opacity-50'
@@ -231,7 +257,7 @@ const Jobs = () => {
                             {isLoading ? 'Searching...' : 'Search Jobs'}
                         </button>
                     </div>
-                    
+
                     {/* Quick Filters */}
                     <div className='flex flex-wrap gap-3'>
                         <span className='text-sm font-medium text-gray-500'>Popular Searches:</span>
@@ -246,17 +272,17 @@ const Jobs = () => {
                         ))}
                     </div>
                 </div>
-                
+
                 <div className='flex gap-6'>
                     {/* Enhanced Filter Section */}
                     <div className='w-1/4 space-y-6'>
                         <div className='bg-white p-6 rounded-xl shadow-lg'>
                             <h3 className='text-xl font-semibold mb-6 text-gray-800'>Advanced Filters</h3>
-                            
+
                             {/* Salary Range Slider */}
                             <div className='mb-6'>
                                 <label className='block text-sm font-medium mb-2 text-gray-700'>Salary Range</label>
-                                <select 
+                                <select
                                     value={filters.salaryRange}
                                     onChange={(e) => handleFilterChange('salaryRange', e.target.value)}
                                     className='w-full p-3 rounded-lg border-2 border-gray-100 focus:border-violet-500 transition-all duration-300'
@@ -267,7 +293,7 @@ const Jobs = () => {
                                     ))}
                                 </select>
                             </div>
-                            
+
                             {/* Experience Level */}
                             <div className='mb-6'>
                                 <label className='block text-sm font-medium mb-2 text-gray-700'>Experience Level</label>
@@ -287,7 +313,7 @@ const Jobs = () => {
                                     ))}
                                 </div>
                             </div>
-                            
+
                             {/* Job Type Tags */}
                             <div className='mb-6'>
                                 <label className='block text-sm font-medium mb-2 text-gray-700'>Job Type</label>
@@ -307,7 +333,7 @@ const Jobs = () => {
                                     ))}
                                 </div>
                             </div>
-                            
+
                             {/* Clear Filters Button */}
                             <button
                                 onClick={() => setFilters({
@@ -332,7 +358,7 @@ const Jobs = () => {
                                 Found <span className='font-semibold text-violet-600'>{filterJobs.length}</span> jobs
                             </div>
                             <div className='flex gap-4 items-center'>
-                                <select 
+                                <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
                                     className='bg-gray-50 border border-gray-200 rounded-md px-3 py-1.5'
@@ -343,13 +369,13 @@ const Jobs = () => {
                                     <option value="salary-low">Lowest Salary</option>
                                 </select>
                                 <div className='flex gap-2'>
-                                    <button 
+                                    <button
                                         onClick={() => setViewType('grid')}
                                         className={`p-1.5 rounded ${viewType === 'grid' ? 'bg-violet-100 text-violet-600' : 'text-gray-400'}`}
                                     >
                                         □□□
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setViewType('list')}
                                         className={`p-1.5 rounded ${viewType === 'list' ? 'bg-violet-100 text-violet-600' : 'text-gray-400'}`}
                                     >
@@ -389,38 +415,5 @@ const Jobs = () => {
             </div>
         </div>
     );
-};
-// Add these functions in the Jobs component
-const handleLoadMore = () => {
-    // Implement pagination logic here
-};
-
-const quickFilter = (filterType) => {
-    setFilters(prev => ({
-        ...prev,
-        [filterType === 'remote' ? 'location' : 
-         filterType === 'full-time' ? 'jobType' : 
-         'experienceLevel']: filterType.replace(' work', '')
-    }));
-};
-
-// Add this function in the Job component
-const handleQuickApply = async (jobId) => {
-    try {
-        const response = await fetch(`/api/v1/job/${jobId}/apply`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        const data = await response.json();
-        if (data.success) {
-            // Show success notification
-            alert('Successfully applied!');
-        }
-    } catch (error) {
-        console.error('Error applying:', error);
-        alert('Failed to apply. Please try again.');
-    }
 };
 export default Jobs;

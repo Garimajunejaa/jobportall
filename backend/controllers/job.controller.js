@@ -15,7 +15,8 @@ export const postJob = async (req, res) => {
             jobType, 
             experienceLevel, 
             position, 
-            company 
+            company,
+            isFeatured // Added isFeatured field
         } = req.body;
         
         const userId = req.id;
@@ -41,6 +42,7 @@ export const postJob = async (req, res) => {
             experienceLevel: Number(experienceLevel),
             position: Number(position),
             company, // Changed from companyId to company
+            isFeatured: isFeatured || false, // Set isFeatured, default false
             created_by: userId
         });
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { setSearchedQuery, setSearchFilters } from '@/redux/jobSlice'
+import { setSearchedQuery, setSearchFilters } from '../redux/jobSlice'
 import { Button } from './ui/button'
 import { Search, MapPin, Briefcase, X, Clock, TrendingUp, Building, Code2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -54,6 +54,43 @@ const trendingKeywords = ['Remote', 'AI/ML', 'Web3', 'Blockchain', 'DevOps', 'Cl
 const HeroSection = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    // Normalization mappings for filters
+    const normalizeJobType = (type) => {
+        const map = {
+            'full time': 'full-time',
+            'part time': 'part-time',
+            'remote': 'remote',
+            'internship': 'internship',
+            'contract': 'contract'
+        };
+        return map[type.toLowerCase()] || '';
+    };
+
+    const normalizeSalaryRange = (range) => {
+        const map = {
+            '0-3': '0-30000',
+            '3-6': '30000-60000',
+            '6-10': '60000-90000',
+            '10-15': '90000-120000',
+            '15+': '120000-'
+        };
+        return map[range] || '';
+    };
+
+    const normalizeExperienceLevel = (level) => {
+        const map = {
+            'entry': 'entry',
+            'junior': 'intermediate',
+            'mid': 'intermediate',
+            'senior': 'senior',
+            'lead': 'expert',
+            'executive': 'expert',
+            '': ''
+        };
+        return map[level] || '';
+    };
+
     // Add these new state variables with the existing ones
     const [searchTerm, setSearchTerm] = useState('');
     const [location, setLocation] = useState('');
@@ -93,6 +130,7 @@ const HeroSection = () => {
             sortBy: 'relevance',
             query: ''
         }));
+        handleSearch('', '', '', '', '', 'relevance');
     };
 
     // Fix the handleSearch function
@@ -102,9 +140,9 @@ const HeroSection = () => {
             const searchFilters = {
                 query: query,
                 location: loc,
-                jobType: type,
-                salaryRange,
-                experienceLevel,
+                jobType: normalizeJobType(type),
+                salaryRange: normalizeSalaryRange(salaryRange),
+                experienceLevel: normalizeExperienceLevel(experienceLevel),
                 sortBy
             };
 
@@ -293,13 +331,9 @@ const HeroSection = () => {
                             <div className="relative w-full md:w-64">
                                 <select
                                     value={location}
-                                    onChange={(e) => {
+                                onChange={(e) => {
                                         setLocation(e.target.value);
-                                        setFilters(prev => ({
-                                            ...prev,
-                                            location: e.target.value
-                                        }));
-                                        handleSearch(searchTerm, e.target.value, jobType);
+                                        handleSearch(searchTerm, e.target.value, jobType, salaryRange, experienceLevel, sortBy);
                                     }}
                                     className="w-full pl-10 pr-4 py-4 text-base bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-teal-100 rounded-xl appearance-none focus:border-teal-400 focus:ring-4 focus:ring-teal-100 transition-all"
                                 >
@@ -327,7 +361,10 @@ const HeroSection = () => {
                             {popularTypes.map((filter, index) => (
                                 <motion.button
                                     key={filter}
-                                    onClick={() => setJobType(filter.toLowerCase())}
+                                    onClick={() => {
+                                        setJobType(filter.toLowerCase());
+                                        handleSearch(searchTerm, location, filter.toLowerCase(), salaryRange, experienceLevel, sortBy);
+                                    }}
                                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                                         jobType === filter.toLowerCase()
                                             ? 'bg-sky-100 text-sky-600 shadow-inner'
@@ -374,7 +411,10 @@ const HeroSection = () => {
                                     {/* Salary Range */}
                                     <select
                                         value={salaryRange}
-                                        onChange={(e) => setSalaryRange(e.target.value)}
+                                        onChange={(e) => {
+                                            setSalaryRange(e.target.value);
+                                            handleSearch(searchTerm, location, jobType, e.target.value, experienceLevel, sortBy);
+                                        }}
                                         className="w-full p-4 rounded-xl bg-gradient-to-r from-sky-50 to-teal-50 border-2 border-sky-100 focus:border-sky-400 text-gray-700"
                                     >
                                         {salaryRanges.map((range) => (
@@ -387,7 +427,10 @@ const HeroSection = () => {
                                     {/* Experience Level */}
                                     <select
                                         value={experienceLevel}
-                                        onChange={(e) => setExperienceLevel(e.target.value)}
+                                        onChange={(e) => {
+                                            setExperienceLevel(e.target.value);
+                                            handleSearch(searchTerm, location, jobType, salaryRange, e.target.value, sortBy);
+                                        }}
                                         className="w-full p-4 rounded-xl bg-gradient-to-r from-sky-50 to-teal-50 border-2 border-sky-100 focus:border-sky-400 text-gray-700"
                                     >
                                         {experienceLevels.map((level) => (
@@ -400,7 +443,10 @@ const HeroSection = () => {
                                     {/* Sort By */}
                                     <select
                                         value={sortBy}
-                                        onChange={(e) => setSortBy(e.target.value)}
+                                        onChange={(e) => {
+                                            setSortBy(e.target.value);
+                                            handleSearch(searchTerm, location, jobType, salaryRange, experienceLevel, e.target.value);
+                                        }}
                                         className="w-full p-4 rounded-xl bg-gradient-to-r from-sky-50 to-teal-50 border-2 border-sky-100 focus:border-sky-400 text-gray-700"
                                     >
                                         <option value="relevance">Most Relevant</option>

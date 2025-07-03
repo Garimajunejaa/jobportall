@@ -2,7 +2,7 @@ import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
-import cloudinary from "../utils/cloudinary.js";
+import cloudinary, { generateSignedUrl } from "../utils/cloudinary.js";
 
 export const register = async (req, res) => {
     try {
@@ -125,7 +125,7 @@ export const logout = async (req, res) => {
 }
 export const updateProfile = async (req, res) => {
     try {
-        const { fullname, email, phoneNumber, bio, skills } = req.body;
+        const { fullname, email, phoneNumber, bio, skills, location } = req.body;
         const userId = req.id;
 
         let user = await User.findById(userId);
@@ -138,12 +138,47 @@ export const updateProfile = async (req, res) => {
 
         // Handle file upload only if a file is present
         if (req.file) {
+            // Validate file type and size
+            const allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+            if (!allowedMimeTypes.includes(req.file.mimetype)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid file type. Only PDF and image files are allowed.'
+                });
+            }
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (req.file.size > maxSize) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'File size exceeds 5MB limit.'
+                });
+            }
             const fileUri = getDataUri(req.file);
             const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-            // Update resume only if file upload is successful
-            user.profile.resume = cloudResponse.secure_url;
-            user.profile.resumeOriginalName = req.file.originalname;
+            // Update resume or profile photo based on mimetype
+            if (req.file.mimetype === 'application/pdf') {
+                user.profile.resume = cloudResponse.secure_url;
+                user.profile.resumeOriginalName = req.file.originalname;
+            } else {
+                user.profile.profilePhoto = cloudResponse.secure_url;
+            }
         }
+
+        // Generate signed URL for resume if exists
+            if (user.profile.resume) {
+                // Extract public ID from URL
+                const url = user.profile.resume;
+                // Remove base URL and version number to get publicId
+                const baseUrlPattern = /https:\/\/res\.cloudinary\.com\/[^\/]+\/raw\/upload\/v\d+\//;
+                const publicIdWithExt = url.replace(baseUrlPattern, '');
+                // Remove file extension
+                const publicId = publicIdWithExt.replace(/\.[^/.]+$/, '');
+                if (publicId) {
+                    user.profile.signedResumeUrl = generateSignedUrl(publicId, { expires_at: Math.floor(Date.now() / 1000) + 3600 });
+                } else {
+                    user.profile.signedResumeUrl = user.profile.resume;
+                }
+            }
 
         // Update other fields
         if (fullname) user.fullname = fullname;
@@ -154,6 +189,7 @@ export const updateProfile = async (req, res) => {
             const skillsArray = skills.split(",");
             user.profile.skills = skillsArray;
         }
+        if (location) user.profile.location = location;
 
         await user.save();
 

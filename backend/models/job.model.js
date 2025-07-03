@@ -51,6 +51,10 @@ const jobSchema = new mongoose.Schema({
         type: String,
         default: 'other'
     },
+    isFeatured: {
+        type: Boolean,
+        default: false
+    },
     company: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Company',

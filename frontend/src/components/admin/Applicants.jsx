@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import Navbar from '../shared/Navbar'
 import ApplicantsTable from './ApplicantsTable'
 import axios from 'axios';
@@ -7,20 +7,23 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAllApplicants } from '@/redux/applicationSlice';
 
+
+
 const Applicants = () => {
     const params = useParams();
     const dispatch = useDispatch();
-    const {applicants} = useSelector(store=>store.application);
+    const applicants = useSelector(store => store.application.applications);
 
     useEffect(() => {
-        const fetchAllApplicants = async () => {
-            try {
-                const res = await axios.get(`${APPLICATION_API_END_POINT}/${params.id}/applicants`, { withCredentials: true });
-                dispatch(setAllApplicants(res.data.job));
-            } catch (error) {
-                console.log(error);
+            const fetchAllApplicants = async () => {
+                try {
+                    const res = await axios.get(`${APPLICATION_API_END_POINT}/${params.id}/applicants`, { withCredentials: true });
+                    dispatch(setAllApplicants(res.data.applications));
+                    console.log("Applicants state after dispatch:", res.data.applications);
+                } catch (error) {
+                    console.log(error);
+                }
             }
-        }
         fetchAllApplicants();
     }, []);
 
@@ -35,10 +38,7 @@ const Applicants = () => {
                                 Job Applicants
                             </h1>
                             <p className='text-gray-500 mt-1'>
-                                Total Applications: {' '}
-                                <span className='font-medium text-violet-600'>
-                                    {applicants?.applications?.length || 0}
-                                </span>
+                             View Applicants ({applicants?.length || 0})
                             </p>
                         </div>
                         <div className='text-sm text-gray-500'>
@@ -46,7 +46,7 @@ const Applicants = () => {
                         </div>
                     </div>
 
-                    {applicants?.applications?.length === 0 ? (
+                    {applicants?.length === 0 ? (
                         <div className='text-center py-12'>
                             <div className='text-6xl mb-4'>👥</div>
                             <h3 className='text-lg font-medium text-gray-900'>No applicants yet</h3>

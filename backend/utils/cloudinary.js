@@ -7,4 +7,14 @@ cloudinary.config({
     api_key:process.env.API_KEY,
     api_secret:process.env.API_SECRET
 });
+
+export const generateSignedUrl = (publicId, options = {}) => {
+    return cloudinary.url(publicId, {
+        type: 'upload',
+        sign_url: true,
+        resource_type: 'raw',
+        ...options
+    });
+};
+
 export default cloudinary;

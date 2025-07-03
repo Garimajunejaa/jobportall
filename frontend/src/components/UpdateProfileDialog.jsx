@@ -21,7 +21,9 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         phoneNumber: user?.phoneNumber || "",
         bio: user?.profile?.bio || "",
         skills: user?.profile?.skills?.join(", ") || "",
-        file: user?.profile?.resume || ""
+        file: user?.profile?.resume || "",
+        location: user?.profile?.location || "",
+        profilePhoto: user?.profile?.profilePhoto || ""
     });
 
     const changeEventHandler = (e) => {
@@ -75,7 +77,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="sm:max-w-[500px] bg-white rounded-xl">
+            <DialogContent className="sm:max-w-[500px] bg-white rounded-xl overflow-y-auto max-h-[80vh]">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-cyan-600 bg-clip-text text-transparent">
                         Update Profile
@@ -144,6 +146,36 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                 className="border-gray-200 focus:ring-violet-500"
                                 placeholder="e.g. React, Node.js, TypeScript"
                             />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="location" className="text-gray-700">Location</Label>
+                            <Input
+                                id="location"
+                                name="location"
+                                value={input.location}
+                                onChange={changeEventHandler}
+                                className="border-gray-200 focus:ring-violet-500"
+                                placeholder="Your location"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="profilePhoto" className="text-gray-700">Profile Image</Label>
+                            <Input
+                                id="profilePhoto"
+                                name="profilePhoto"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    setInput({ ...input, file });
+                                }}
+                                className="border-gray-200 focus:ring-violet-500"
+                            />
+                            {input.profilePhoto && typeof input.profilePhoto === 'string' && (
+                                <img src={input.profilePhoto} alt="Profile" className="mt-2 h-20 w-20 rounded-full object-cover" />
+                            )}
                         </div>
 
                         <div className="space-y-2">

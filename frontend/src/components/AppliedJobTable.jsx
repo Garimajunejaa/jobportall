@@ -4,23 +4,25 @@ import { Badge } from './ui/badge'
 import { useSelector, useDispatch } from 'react-redux'
 import { Loader2 } from 'lucide-react'
 import axios from 'axios'
-import { APPLICATION_API_END_POINT,} from '@/utils/constant'
+import { APPLICATION_API_END_POINT } from '@/utils/constant'
 import { toast } from 'sonner'
 import { setAllAppliedJobs } from '@/redux/jobSlice'
 
 const AppliedJobTable = () => {
-    const { allAppliedJobs } = useSelector(store => store.job);
+    const allAppliedJobs = useSelector(store => store.job.allAppliedJobs);
     const [isLoading, setIsLoading] = useState(true);
     const dispatch = useDispatch();
 
     useEffect(() => {
         const fetchApplications = async () => {
             try {
-                const response = await axios.get(`${APPLICATION_API_END_POINT}`);
+                const response = await axios.get(`${APPLICATION_API_END_POINT}/get`, { withCredentials: true });
+                console.log("AppliedJobTable API response:", response.data);
                 if (response.data.success) {
                     dispatch(setAllAppliedJobs(response.data.applications));
                 }
             } catch (error) {
+                console.error("AppliedJobTable API error:", error);
                 toast.error(error.response?.data?.message || 'Failed to fetch applications');
             } finally {
                 setIsLoading(false);
